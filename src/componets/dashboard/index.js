@@ -6,7 +6,6 @@ import "../style/card.css";
 import { auth, db, logout } from "../../firebase/firebase";
 import Item from "./item";
 //MATERIAL UI
-import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 //MENU
 import AppBar from '@mui/material/AppBar';
@@ -20,27 +19,10 @@ import useScrollTrigger from '@mui/material/useScrollTrigger';
 import PropTypes from 'prop-types';
 import Container from '@mui/material/Container';
 import CssBaseline from '@mui/material/CssBaseline';
-
-const useStyles = makeStyles((theme) => ({
-	root: {
-		flexGrow: 1,
-	},
-	paper: {
-		padding: theme.spacing(2),
-		margin: "auto",
-		maxWidth: "100%",
-		overflowY: "scroll"
-	},
-	image: {
-	},
-	img: {
-		margin: "auto",
-		display: "block",
-		maxWidth: "80%",
-		maxHeight: "80%"
-	}
-}));
-
+//estilos
+import useStylesIndex from "../style/index";
+//distancias
+import calculateDistance from "../../geolocation/distance";
 
 function ElevationScroll(props) {
 	const { children, window } = props;
@@ -67,12 +49,17 @@ ElevationScroll.propTypes = {
 	window: PropTypes.func,
 };
 
+
+
 function Dashboard(props) {
-	const classes = useStyles();
+	const classes = useStylesIndex();
 	//Data de geolocalizacion
-	const [position, setPosition] = useState([0, 0]);
+	const [currentPosition, setCurrentPosition] = useState({
+		lat: 0,
+		long: 0
+	});
 	const [speed, setSpeed] = useState(0);
-	const [odo, setOdo] = useState(0)
+	const [odoTotal, setOdoTotal] = useState(0)
 	const [user, loading, error] = useAuthState(auth);
 	const [name, setName] = useState("");
 	const [points, setPoints] = useState([1, 2, 3, 4, 5, 6, 8, 9, 9, 9]);
@@ -91,12 +78,14 @@ function Dashboard(props) {
 			alert("An error occured while fetching user data");
 		}
 	};
+
+	const resetOdo = () => {
+		setOdoTotal(0);
+	}
+
 	const loadPoints = () =>
 	(<Paper className={classes.paper}> {points.map(point => {
-		console.log(point)
-
-		return (
-			<Item></Item>)
+		return (<Item></Item>)
 	})}</Paper>);
 
 	const requestGeoLocation = () => {
@@ -126,21 +115,49 @@ function Dashboard(props) {
 			}
 		});
 	}
+	function successLocation(position) {
+		console.log('init position', position)
 
+		setCurrentPosition({
+			lat: position.coords.latitude,
+			lon: position.coords.longitude
+		});
+	}
 	useEffect(() => {
-		if ("geolocation" in navigator) {
-			console.log("Available");
-		} else {
-			console.log("Not Available");
+		if (!("geolocation" in navigator)) {
+			requestGeoLocation();
 		}
-		requestGeoLocation();
+		navigator.geolocation.getCurrentPosition(successLocation, error, {
+			enableHighAccuracy: true
+		});
+		//requestGeoLocation();
 		if (loading) return;
 		if (!user) return history.replace("/");
+
 		navigator.geolocation.watchPosition(position => {
-			console.log(position);
-			setPosition(position.coords.latitude, position.coords.longitude)
+			if (position.coords.latitude == 0 || position.coords.longitude == 0) {
+				return;
+			}
+			if (currentPosition[0] == 0) {
+				setCurrentPosition(position.coords.latitude, position.coords.longitude);
+			}
+			console.log("position", position)
+			console.log(currentPosition.lat, currentPosition.lon, position.coords.latitude, position.coords.longitude, odoTotal, calculateDistance(currentPosition.lat, currentPosition.lon, position.coords.latitude, position.coords.longitude))
+
+			setOdoTotal(odoTotal + calculateDistance(currentPosition.lat, currentPosition.lon, position.coords.latitude, position.coords.longitude))
+
+			setCurrentPosition({
+				lat: position.coords.latitude,
+				lon: position.coords.longitude
+			});
+
 			setSpeed(position.coords.speed | 0);
-		})
+		}, error => {
+			console.log("error")
+		},
+			{
+				enableHighAccuracy: true
+			})
 
 		fetchUserName();
 	}, [user, loading]);
@@ -167,12 +184,12 @@ function Dashboard(props) {
 					</Toolbar>
 					<Toolbar>
 						<Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-							{odo} KM
+							{odoTotal} KM
 						</Typography>
 						<Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
 							{speed} KM/H
 						</Typography>
-						<Button color="inherit" onClick={logout}>Reset</Button>
+						<Button color="inherit" onClick={resetOdo}>Reset</Button>
 					</Toolbar>
 				</AppBar>
 			</ElevationScroll>
