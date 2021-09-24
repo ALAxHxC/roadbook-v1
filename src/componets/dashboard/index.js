@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
 	paper: {
 		padding: theme.spacing(2),
 		margin: "auto",
-		maxWidth: "70%",
+		maxWidth: "100%",
 		overflowY: "scroll"
 	},
 	image: {
@@ -71,6 +71,8 @@ function Dashboard(props) {
 	const classes = useStyles();
 	//Data de geolocalizacion
 	const [position, setPosition] = useState([0, 0]);
+	const [speed, setSpeed] = useState(0);
+	const [odo, setOdo] = useState(0)
 	const [user, loading, error] = useAuthState(auth);
 	const [name, setName] = useState("");
 	const [points, setPoints] = useState([1, 2, 3, 4, 5, 6, 8, 9, 9, 9]);
@@ -97,6 +99,33 @@ function Dashboard(props) {
 			<Item></Item>)
 	})}</Paper>);
 
+	const requestGeoLocation = () => {
+		navigator.permissions.query({
+			name: 'geolocation'
+		}).then(function (result) {
+			if (result.state == 'granted') {
+
+			} else if (result.state == 'prompt') {
+				alert("NESECITAMOS LA UBICACION PARA CONTINUAR");
+				alert(result.state);
+				//geoBtn.style.display = 'none';
+			} else if (result.state == 'denied') {
+				alert(result.state);
+				navigator.geolocation.getCurrentPosition(() => {
+
+				}, () => {
+					alert("LO SIENTO NESECITAMOS LA UBICACION PARA CONTINUAR");
+					requestGeoLocation();
+				}, {
+					enableHighAccuracy: true
+				});
+				//geoBtn.style.display = 'inline';
+			}
+			result.onchange = function () {
+				alert("NESECITAMOS LA UBICACION PARA CONTINUAR");
+			}
+		});
+	}
 
 	useEffect(() => {
 		if ("geolocation" in navigator) {
@@ -104,11 +133,13 @@ function Dashboard(props) {
 		} else {
 			console.log("Not Available");
 		}
+		requestGeoLocation();
 		if (loading) return;
 		if (!user) return history.replace("/");
 		navigator.geolocation.watchPosition(position => {
 			console.log(position);
 			setPosition(position.coords.latitude, position.coords.longitude)
+			setSpeed(position.coords.speed | 0);
 		})
 
 		fetchUserName();
@@ -130,9 +161,18 @@ function Dashboard(props) {
 							<MenuIcon />
 						</IconButton>
 						<Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-							Roadbook V1
+							Waypoint 1
 						</Typography>
 						<Button color="inherit" onClick={logout}>Logout</Button>
+					</Toolbar>
+					<Toolbar>
+						<Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+							{odo} KM
+						</Typography>
+						<Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+							{speed} KM/H
+						</Typography>
+						<Button color="inherit" onClick={logout}>Reset</Button>
 					</Toolbar>
 				</AppBar>
 			</ElevationScroll>
