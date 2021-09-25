@@ -9,8 +9,8 @@ import Paper from '@material-ui/core/Paper';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
+//import IconButton from '@mui/material/IconButton';
+//import MenuIcon from '@mui/icons-material/Menu';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import PropTypes from 'prop-types';
@@ -19,11 +19,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Item from './item';
 
 //MENU
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import PopupState, { bindTrigger, bindMenu } from 'material-ui-popup-state';
-
-
+import MenuRoadbook from '../menu';
 import { auth, db, logout } from '../../firebase/firebase';
 // estilos
 import useStylesIndex from '../style/index';
@@ -67,9 +63,6 @@ function Roadbook(props) {
             console.error(err);
             alert('An error occured while fetching user data');
         }
-    };
-    const goToplaneRoute = () => {
-        history.replace('planroute');
     };
 	
     const resetOdo = () => {
@@ -159,28 +152,7 @@ function Roadbook(props) {
             <ElevationScroll {...props}>
                 <AppBar position="fixed">
                     <Toolbar>
-                        <PopupState variant="popover" popupId="demo-popup-menu">
-                            {(popupState) => (
-                                <React.Fragment>
-                                    <IconButton
-                                        size="large"
-                                        edge="start"
-                                        color="inherit"
-                                        aria-label="menu"
-                                        sx={{ mr: 2 }}
-                                        variant="contained" {...bindTrigger(popupState)}
-                                    >
-                                        <MenuIcon />
-                                    </IconButton>
-                                    <Menu {...bindMenu(popupState)}>
-                                        <MenuItem onClick={goToplaneRoute}>Plan Route</MenuItem>
-                                        <MenuItem onClick={popupState.close}>My account</MenuItem>
-                                        <MenuItem onClick={popupState.close}>Logout</MenuItem>
-                                    </Menu>
-                                </React.Fragment>
-                            )}
-                        </PopupState>
-                        
+                        <MenuRoadbook history={history}></MenuRoadbook>
                         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
 							Waypoint 1
                         </Typography>
