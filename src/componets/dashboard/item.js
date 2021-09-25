@@ -47,7 +47,7 @@ export default function Item() {
 				</Grid>
 				<Grid item xs={4}>
 					<Grid item>
-						<Typography variant="subtitle1">$19.00</Typography>
+						<Typography variant="subtitle1">Peligro dos</Typography>
 					</Grid>
 				</Grid>
 			</Grid>

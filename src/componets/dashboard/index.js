@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { useHistory } from "react-router";
-//import "../Dashboard.css";
-import "../style/card.css";
-import { auth, db, logout } from "../../firebase/firebase";
-import Item from "./item";
-//MATERIAL UI
-import Paper from "@material-ui/core/Paper";
-//MENU
+import React, { useEffect, useState, useContext } from 'react';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { useHistory } from 'react-router';
+// import "../Dashboard.css";
+import '../style/card.css';
+// MATERIAL UI
+import Paper from '@material-ui/core/Paper';
+// MENU
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -19,10 +17,16 @@ import useScrollTrigger from '@mui/material/useScrollTrigger';
 import PropTypes from 'prop-types';
 import Container from '@mui/material/Container';
 import CssBaseline from '@mui/material/CssBaseline';
-//estilos
-import useStylesIndex from "../style/index";
-//distancias
-import calculateDistance from "../../geolocation/distance";
+import Item from './item';
+import { auth, db, logout } from '../../firebase/firebase';
+// estilos
+import useStylesIndex from '../style/index';
+// distancias
+import calculateDistance from '../../geolocation/distance';
+//APP
+import {
+	ContextData
+} from "../../App";
 
 function ElevationScroll(props) {
 	const { children, window } = props;
@@ -43,127 +47,126 @@ function ElevationScroll(props) {
 ElevationScroll.propTypes = {
 	children: PropTypes.element.isRequired,
 	/**
-	 * Injected by the documentation to work in an iframe.
-	 * You won't need it on your project.
-	 */
+		 * Injected by the documentation to work in an iframe.
+		 * You won't need it on your project.
+		 */
 	window: PropTypes.func,
 };
 
-
-
 function Dashboard(props) {
+	const context = useContext(ContextData)
+	console.log(context)
 	const classes = useStylesIndex();
-	//Data de geolocalizacion
+	// Data de geolocalizacion
 	const [currentPosition, setCurrentPosition] = useState({
 		lat: 0,
-		long: 0
+		long: 0,
 	});
 	const [speed, setSpeed] = useState(0);
-	const [odoTotal, setOdoTotal] = useState(0)
+	const [odoTotal, setOdoTotal] = useState(0);
 	const [user, loading, error] = useAuthState(auth);
-	const [name, setName] = useState("");
+	const [name, setName] = useState('');
 	const [points, setPoints] = useState([1, 2, 3, 4, 5, 6, 8, 9, 9, 9]);
 	const history = useHistory();
 
 	const fetchUserName = async () => {
 		try {
 			const query = await db
-				.collection("users")
-				.where("uid", "==", user?.uid)
+				.collection('users')
+				.where('uid', '==', user?.uid)
 				.get();
 			const data = await query.docs[0].data();
 			setName(data.name);
 		} catch (err) {
 			console.error(err);
-			alert("An error occured while fetching user data");
+			alert('An error occured while fetching user data');
 		}
 	};
 
 	const resetOdo = () => {
 		setOdoTotal(0);
-	}
+		context.odometer = 0;
+	};
 
-	const loadPoints = () =>
-	(<Paper className={classes.paper}> {points.map(point => {
-		return (<Item></Item>)
-	})}</Paper>);
+	const loadPoints = () => (
+		<Paper className={classes.paper}>
+			{points.map((point, index) => (<Item key={index} />))}
+		</Paper>
+	);
 
 	const requestGeoLocation = () => {
 		navigator.permissions.query({
-			name: 'geolocation'
-		}).then(function (result) {
+			name: 'geolocation',
+		}).then((result) => {
 			if (result.state == 'granted') {
 
 			} else if (result.state == 'prompt') {
-				alert("NESECITAMOS LA UBICACION PARA CONTINUAR");
+				alert('NESECITAMOS LA UBICACION PARA CONTINUAR');
 				alert(result.state);
-				//geoBtn.style.display = 'none';
 			} else if (result.state == 'denied') {
 				alert(result.state);
 				navigator.geolocation.getCurrentPosition(() => {
 
 				}, () => {
-					alert("LO SIENTO NESECITAMOS LA UBICACION PARA CONTINUAR");
+					alert('LO SIENTO NESECITAMOS LA UBICACION PARA CONTINUAR');
 					requestGeoLocation();
 				}, {
-					enableHighAccuracy: true
+					enableHighAccuracy: true,
 				});
-				//geoBtn.style.display = 'inline';
 			}
 			result.onchange = function () {
-				alert("NESECITAMOS LA UBICACION PARA CONTINUAR");
-			}
+				alert('NESECITAMOS LA UBICACION PARA CONTINUAR');
+			};
 		});
-	}
+	};
 	function successLocation(position) {
-		console.log('init position', position)
+		console.log('init position', position);
 
 		setCurrentPosition({
 			lat: position.coords.latitude,
-			lon: position.coords.longitude
+			lon: position.coords.longitude,
 		});
 	}
 	useEffect(() => {
-		if (!("geolocation" in navigator)) {
+		if (!('geolocation' in navigator)) {
 			requestGeoLocation();
 		}
 		navigator.geolocation.getCurrentPosition(successLocation, error, {
-			enableHighAccuracy: true
+			enableHighAccuracy: true,
 		});
-		//requestGeoLocation();
+		// requestGeoLocation();
 		if (loading) return;
-		if (!user) return history.replace("/");
+		if (!user) return history.replace('/');
 
-		navigator.geolocation.watchPosition(position => {
-			if (position.coords.latitude == 0 || position.coords.longitude == 0) {
+		navigator.geolocation.watchPosition((position) => {
+			if (position.coords.latitude === 0 || position.coords.longitude == 0) {
 				return;
 			}
-			if (currentPosition[0] == 0) {
+			if (currentPosition[0] === 0) {
 				setCurrentPosition(position.coords.latitude, position.coords.longitude);
 			}
-			console.log("position", position)
-			console.log(currentPosition.lat, currentPosition.lon, position.coords.latitude, position.coords.longitude, odoTotal, calculateDistance(currentPosition.lat, currentPosition.lon, position.coords.latitude, position.coords.longitude))
-
-			setOdoTotal(odoTotal + calculateDistance(currentPosition.lat, currentPosition.lon, position.coords.latitude, position.coords.longitude))
+			context.odometer = context.odometer + calculateDistance(currentPosition.lat,
+				currentPosition.lon, position.coords.latitude, position.coords.longitude);
+			setOdoTotal((context.odometer / 1000).toFixed(3));
 
 			setCurrentPosition({
 				lat: position.coords.latitude,
-				lon: position.coords.longitude
+				lon: position.coords.longitude,
 			});
 
 			setSpeed(position.coords.speed | 0);
-		}, error => {
-			console.log("error")
+		}, (error) => {
+			console.log('error');
 		},
 			{
-				enableHighAccuracy: true
-			})
+				enableHighAccuracy: true,
+			});
 
 		fetchUserName();
 	}, [user, loading]);
 	return (
 
-		<React.Fragment>
+		<>
 			<CssBaseline />
 			<ElevationScroll {...props}>
 				<AppBar position="fixed">
@@ -184,10 +187,14 @@ function Dashboard(props) {
 					</Toolbar>
 					<Toolbar>
 						<Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-							{odoTotal} KM
+							{odoTotal}
+							{' '}
+							KM
 						</Typography>
 						<Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-							{speed} KM/H
+							{speed}
+							{' '}
+							KM/H
 						</Typography>
 						<Button color="inherit" onClick={resetOdo}>Reset</Button>
 					</Toolbar>
@@ -203,7 +210,7 @@ function Dashboard(props) {
 					{loadPoints()}
 				</Box>
 			</Container>
-		</React.Fragment>
+		</>
 	);
 }
 export default Dashboard;
