@@ -1,5 +1,5 @@
 import useScrollTrigger from '@mui/material/useScrollTrigger';
-
+import React from 'react'
 function ElevationScroll(props) {
 	const { children, window } = props;
 	// Note that you normally won't need to set the window ref as useScrollTrigger
@@ -16,4 +16,4 @@ function ElevationScroll(props) {
 	});
 }
 
-default export ElevationScroll;
+export default ElevationScroll;

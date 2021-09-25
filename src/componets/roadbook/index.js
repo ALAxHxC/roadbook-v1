@@ -13,7 +13,6 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import useScrollTrigger from '@mui/material/useScrollTrigger';
 import PropTypes from 'prop-types';
 import Container from '@mui/material/Container';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -21,6 +20,7 @@ import Item from './item';
 import { auth, db, logout } from '../../firebase/firebase';
 // estilos
 import useStylesIndex from '../style/index';
+import ElevationScroll from '../style/scroll';
 // distancias
 import calculateDistance from '../../geolocation/distance';
 //APP
@@ -28,34 +28,13 @@ import {
 	ContextData
 } from "../../App";
 
-function ElevationScroll(props) {
-	const { children, window } = props;
-	// Note that you normally won't need to set the window ref as useScrollTrigger
-	// will default to window.
-	// This is only being set here because the demo is in an iframe.
-	const trigger = useScrollTrigger({
-		disableHysteresis: true,
-		threshold: 0,
-		target: window ? window() : undefined,
-	});
-
-	return React.cloneElement(children, {
-		elevation: trigger ? 4 : 0,
-	});
-}
-
 ElevationScroll.propTypes = {
 	children: PropTypes.element.isRequired,
-	/**
-		 * Injected by the documentation to work in an iframe.
-		 * You won't need it on your project.
-		 */
 	window: PropTypes.func,
 };
 
-function Dashboard(props) {
+function Roadbook(props) {
 	const context = useContext(ContextData)
-	console.log(context)
 	const classes = useStylesIndex();
 	// Data de geolocalizacion
 	const [currentPosition, setCurrentPosition] = useState({
@@ -120,8 +99,6 @@ function Dashboard(props) {
 		});
 	};
 	function successLocation(position) {
-		console.log('init position', position);
-
 		setCurrentPosition({
 			lat: position.coords.latitude,
 			lon: position.coords.longitude,
@@ -187,14 +164,10 @@ function Dashboard(props) {
 					</Toolbar>
 					<Toolbar>
 						<Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-							{odoTotal}
-							{' '}
-							KM
+							{odoTotal} KM
 						</Typography>
 						<Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-							{speed}
-							{' '}
-							KM/H
+							{speed} KM/H
 						</Typography>
 						<Button color="inherit" onClick={resetOdo}>Reset</Button>
 					</Toolbar>
@@ -213,4 +186,4 @@ function Dashboard(props) {
 		</>
 	);
 }
-export default Dashboard;
+export default Roadbook;

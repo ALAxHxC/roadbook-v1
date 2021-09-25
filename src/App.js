@@ -8,7 +8,7 @@ import React from "react";
 import Location from './componets/location';
 import Login from './componets/login';
 import Register from './componets/register';
-import Dashboard from './componets/dashboard/index';
+import Roadbook from './componets/roadbook/index';
 import Reset from './componets/reset';
 
 let dataOdometer = {
@@ -25,7 +25,8 @@ function App() {
 					<Route exact path="/" component={Login} />
 					<Route exact path="/register" component={Register} />
 					<Route exact path="/reset" component={Reset} />
-					<Route exact path="/dashboard" component={Dashboard} />
+					<Route exact path="/roadbook" component={Roadbook} />
+					<Route exact path="/planroute" component={Roadbook} />
 				</Switch>
 			</Router>
 		</ContextData.Provider>
