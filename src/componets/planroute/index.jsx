@@ -18,6 +18,7 @@ import MenuRoadbook from '../menu';
 
 import ElevationScroll from '../style/scroll';
 // distancias
+import MapPlanRoute from '../maps/index';
 
 ElevationScroll.propTypes = {
     children: PropTypes.element.isRequired,
@@ -59,6 +60,7 @@ function Roadbook(props) {
 						Roadbook V1
                     </Typography>
                 </Box>
+                <MapPlanRoute></MapPlanRoute>
             </Container>
         </>
     );
