@@ -22,6 +22,7 @@ module.exports = {
             'warn',
             4
         ],
+        'react/prop-types': 'off',
         'linebreak-style': [
             'warn',
             'unix'
