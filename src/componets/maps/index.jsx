@@ -13,17 +13,11 @@ import Box from '@mui/material/Box';
 import Alert from '../../common/alert';
 import Painterro from 'painterro';
 import getRoute from './route';
-const style = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 400,
-    bgcolor: 'background.paper',
-    border: '2px solid #000',
-    boxShadow: 24,
-    p: 4,
-};
+import style from '../style/map';
+//https://npm.io/package/painterro
+
+import { createRouteStorage, saveWaypointStorage } from '../../storage/planroute';
+const colors = ['#079CF7', '#07ED88', '#F03724', '#51F707', '#EDAB07'];
 
 function MapPlanRoute(props) {
     // eslint-disable-next-line react/prop-types
@@ -35,17 +29,16 @@ function MapPlanRoute(props) {
     const [openModal, setOpenModal] = useState(false);
     const [openSnack, setOpenSnack] = React.useState(false);
     const [message, getMessage] = React.useState('Error al crear waypoint');
-
     const [currentMarker, setCurrentMarker] = useState(null);
+    const [canSave, setCanSave] = useState(null);
     const addWaypoint = () => {
-        console.log(map.current.getCenter());
         const marker = new mapboxgl.Marker({
-            draggable: true
+            draggable: true,
+            color:colors[(Math.random() * colors.length) | 0]
         }).setLngLat([map.current.getCenter().lng, map.current.getCenter().lat])
         // eslint-disable-next-line react/prop-types
             .setPopup(new mapboxgl.Popup().setHTML(`<h1>Waypoint ${props.waypoints.current.length + 1}</h1>`))
             .addTo(map.current);
-        console.log(marker.getPopup());
         marker.getPopup().on('click',(mark)=> {
             console.log('here');
         });
@@ -71,33 +64,43 @@ function MapPlanRoute(props) {
         // setOpenModal(true);
     };
     const handleClose = () => {
-        console.log('here');
+        //console.log('here');
         setOpenModal(false);
     };
-    const addMarker = () => {
+    const addMarker = (distance) => {
+        console.log('distance', distance);
+        saveWaypointStorage('route', props.waypoints.current.length,
+            JSON.stringify({
+                distance: distance,
+                position:currentMarker._lngLat
+            })
+        );
         props.waypoints.current.push(currentMarker);
     };
     const deleteWaypoint = () => {
         if (currentMarker != null) {
+            props.waypoints.current.pop();
+            map.current.removeLayer(`route-${props.waypoints.current.length}`);
             return currentMarker.remove();	
         }
+			
     };
     const showWaypoint = () => {
       
     };
 	
     const saveWaypoint = () => {
-        console.log(props.waypoints.current.length);
         if (!currentMarker) { 
             handleClickSnack();
             return;
-        }
+				}
+			showPainter();
         if (props.waypoints.current.length < 1) {
-            return addMarker();  
+            return addMarker(0);  
             //return showPainter();
         }
 			
-      
+				
         return newRoute();
         // eslint-disable-next-line react/prop-types
        
@@ -107,9 +110,14 @@ function MapPlanRoute(props) {
 			
     };
     async function newRoute() { 
-        console.log(currentMarker._lngLat, props.waypoints.current[props.waypoints.current.length - 1]._lngLat);
-        await getRoute(currentMarker._lngLat, props.waypoints.current[props.waypoints.current.length - 1]._lngLat, map.current,props.waypoints.current.length);
-        addMarker();
+       
+        const distance = await getRoute(
+            currentMarker._lngLat,
+            props.waypoints.current[props.waypoints.current.length - 1]._lngLat,
+            map.current,
+            props.waypoints.current.length);
+        addMarker(distance);
+        setCurrentMarker(null);
     }
     const showPainter = () => {
         Painterro({
@@ -118,7 +126,7 @@ function MapPlanRoute(props) {
         }).show(); 
     };
     const saveImage = (image, done) => { 
-        addMarker();
+        addMarker(0);
         console.log(image);
         return done(true);
     };

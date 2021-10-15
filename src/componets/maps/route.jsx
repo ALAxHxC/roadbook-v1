@@ -43,6 +43,7 @@ export default async function getRoute(start, end, map,waypoint) {
             'line-opacity': 0.75
         }
     });
+    return data.distance;
     //}
     // add turn instructions here at the end
 }

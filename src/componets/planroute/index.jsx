@@ -49,7 +49,7 @@ function Roadbook(props) {
         if (!user) return history.replace('/');
       
     }, []);
-    const openDraw = () => {
+    const newRoute = () => {
         modal.current = true;
     };
 	
@@ -70,7 +70,7 @@ function Roadbook(props) {
 							Waypoint 1
                         </Typography>
                         <Button color="inherit" onClick={logout}>Logout</Button>
-                        <Button color="inherit" onClick={openDraw}>Draw</Button>
+                        <Button color="inherit" onClick={newRoute}>Nueva Ruta</Button>
                     </Toolbar>
                 </AppBar>
             </ElevationScroll>
