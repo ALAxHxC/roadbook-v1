@@ -9,7 +9,6 @@ export default async function getRoute(start, end, map,waypoint) {
         { method: 'GET' }
     );
     const json = await query.json();
-    console.log(json);
     const data = json.routes[0];
     const route = data.geometry.coordinates;
     const geojson = {
@@ -20,12 +19,10 @@ export default async function getRoute(start, end, map,waypoint) {
             coordinates: route
         }
     };
-    // if the route already exists on the map, we'll reset it using setData
-    /*if (map.getSource('route')) {
+    if (map.getSource(`route-${waypoint}`)) {
         map.getSource('route').setData(geojson);
-    }*/
-    // otherwise, we'll make a new request
-    // else {
+        return;
+    }
     map.addLayer({
         id: `route-${waypoint}`,
         type: 'line',
@@ -44,6 +41,4 @@ export default async function getRoute(start, end, map,waypoint) {
         }
     });
     return data.distance;
-    //}
-    // add turn instructions here at the end
 }

@@ -78,12 +78,16 @@ function MapPlanRoute(props) {
         props.waypoints.current.push(currentMarker);
     };
     const deleteWaypoint = () => {
-        if (currentMarker != null) {
+        if (props.waypoints.current.length > 1) {
+            deleteLayer(props.waypoints.current.length - 1);
             props.waypoints.current.pop();
-            map.current.removeLayer(`route-${props.waypoints.current.length}`);
-            return currentMarker.remove();	
+            setCurrentMarker(props.waypoints.current[props.waypoints.current.length-1]);	 	
         }
-			
+        if (currentMarker != null) {
+            console.log('marker');
+            currentMarker.remove();	
+            
+        }
     };
     const showWaypoint = () => {
       
@@ -93,8 +97,7 @@ function MapPlanRoute(props) {
         if (!currentMarker) { 
             handleClickSnack();
             return;
-				}
-			showPainter();
+        }
         if (props.waypoints.current.length < 1) {
             return addMarker(0);  
             //return showPainter();
@@ -110,25 +113,27 @@ function MapPlanRoute(props) {
 			
     };
     async function newRoute() { 
-       
         const distance = await getRoute(
             currentMarker._lngLat,
             props.waypoints.current[props.waypoints.current.length - 1]._lngLat,
             map.current,
             props.waypoints.current.length);
         addMarker(distance);
-        setCurrentMarker(null);
+        //setCurrentMarker(null);
     }
     const showPainter = () => {
         Painterro({
             language: 'es' , // Spanish
-            saveHandler:saveImage
+            saveHandler: saveImage
         }).show(); 
     };
     const saveImage = (image, done) => { 
         addMarker(0);
         console.log(image);
         return done(true);
+    };
+    const deleteLayer=(id)=>{ 
+        map.current.removeLayer(`route-${id}`);
     };
     useEffect(() => {
         if (map.current) return; // initialize map only once
