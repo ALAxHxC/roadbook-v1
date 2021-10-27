@@ -10,10 +10,13 @@ import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import Grid  from '@mui/material/Grid';
 import Alert from '../../common/alert';
 import Painterro from 'painterro';
 import getRoute from './route';
 import style from '../style/map';
+import Waypoint from '../planroute/waypoint';
 //https://npm.io/package/painterro
 
 import { createRouteStorage, saveWaypointStorage } from '../../storage/planroute';
@@ -57,8 +60,12 @@ function MapPlanRoute(props) {
         }
         setOpenSnack(false);
     };
+    const saveData = (dataImage) => {
+        console.log('dataimage',dataImage);
+    };
     const handleOpen = () => {
         Painterro({
+            asDataURL: saveData,
             language: 'es'  // Spanish
         }).show(); 
         // setOpenModal(true);
@@ -67,15 +74,17 @@ function MapPlanRoute(props) {
         //console.log('here');
         setOpenModal(false);
     };
-    const addMarker = (distance) => {
-        console.log('distance', distance);
+    const addMarker = (distance,image) => {
+        props.waypoints.current.push(currentMarker);
         saveWaypointStorage('route', props.waypoints.current.length,
             JSON.stringify({
                 distance: distance,
-                position:currentMarker._lngLat
+                position: currentMarker._lngLat,
+                image:image
             })
         );
-        props.waypoints.current.push(currentMarker);
+        loadWaypoints();
+        
     };
     const deleteWaypoint = () => {
         if (props.waypoints.current.length > 1) {
@@ -90,27 +99,27 @@ function MapPlanRoute(props) {
         }
     };
     const showWaypoint = () => {
-      
+        localStorage.clear();
     };
-	
+  
     const saveWaypoint = () => {
         if (!currentMarker) { 
             handleClickSnack();
             return;
         }
+        return showPainter();   
+        
+    };
+    const  getDistance= async()=>{
         if (props.waypoints.current.length < 1) {
-            return addMarker(0);  
-            //return showPainter();
+            return 0;
         }
-			
-				
-        return newRoute();
-        // eslint-disable-next-line react/prop-types
-       
-        //setOpenModal(true);
-        // eslint-disable-next-line react/prop-types
-       
-			
+        console.log('draw');
+        return await getRoute(
+            currentMarker._lngLat,
+            props.waypoints.current[props.waypoints.current.length - 1]._lngLat,
+            map.current,
+            props.waypoints.current.length);
     };
     async function newRoute() { 
         const distance = await getRoute(
@@ -118,7 +127,8 @@ function MapPlanRoute(props) {
             props.waypoints.current[props.waypoints.current.length - 1]._lngLat,
             map.current,
             props.waypoints.current.length);
-        addMarker(distance);
+        handleOpen();
+        //addMarker(distance);
         //setCurrentMarker(null);
     }
     const showPainter = () => {
@@ -127,14 +137,20 @@ function MapPlanRoute(props) {
             saveHandler: saveImage
         }).show(); 
     };
-    const saveImage = (image, done) => { 
-        addMarker(0);
-        console.log(image);
+    const saveImage = async (image, done) => { 
+        const distance = await getDistance();
+        addMarker(distance, image.asDataURL());
+        //props.loadWaypoints();
         return done(true);
     };
     const deleteLayer=(id)=>{ 
         map.current.removeLayer(`route-${id}`);
     };
+    const loadWaypoints = () => (
+        <Paper>
+            {[].map((point, index) => (<Waypoint key={index} />))}
+        </Paper >
+    );
     useEffect(() => {
         if (map.current) return; // initialize map only once
         map.current = new mapboxgl.Map({
@@ -150,7 +166,7 @@ function MapPlanRoute(props) {
             trackUserLocation: true,
             showUserHeading: true,
             capturePointerMove:true
-						
+            
         }));
       
         map.current.on('move', () => {
@@ -168,16 +184,38 @@ function MapPlanRoute(props) {
    
     return (
         <React.Fragment>
-            <div className="sidebar">	
-							Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
+          
+            <div>
+                <div className="sidebar">
+Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
+                </div>
+                <div className='center'><div ref={mapContainer} className="map-container" /></div>
             </div>
-            <div ref={mapContainer} className="map-container" />
-            <ButtonGroup variant="contained" aria-label="outlined primary button group">
-                <Button onClick={addWaypoint}>Nuevo Waypoint</Button>
-                <Button onClick={deleteWaypoint}>Eliminar Waypoint</Button>
-                <Button onClick={saveWaypoint}>Guardar Waypoint</Button>
-                <Button onClick={showWaypoint}>Mostrar Waypoints</Button>
-            </ButtonGroup>
+            
+            <Grid
+                container
+                direction="column"
+                justifyContent="flex-start"
+                alignItems="center"
+                spacing={3}
+            >
+               
+                <ButtonGroup disableElevation variant="contained" aria-label="outlined primary button group">
+                    <Button onClick={addWaypoint}>Nuevo Waypoint</Button>
+                    <Button onClick={deleteWaypoint}>Eliminar Waypoint</Button>
+                    <Button onClick={saveWaypoint}>Guardar Waypoint</Button>
+                    <Button onClick={showWaypoint}>Mostrar Waypoints</Button>
+                </ButtonGroup>
+            
+            </Grid>
+            <Grid
+                container
+                direction="column"
+                justifyContent="flex-start"
+                alignItems="center"
+                spacing={3}
+            >{loadWaypoints()}    </Grid>
+            
             <Modal
                 // eslint-disable-next-line react/prop-types
                 open={openModal}
