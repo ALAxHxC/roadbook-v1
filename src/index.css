@@ -12,7 +12,15 @@ code {
     monospace;
 }
 
+.center {
+margin: auto;
+width: 80%;
+
+}
+
 .map-container {
+z-index: 1;
+  margin: auto;
 height: 400px;
 }
  
@@ -27,11 +35,4 @@ top: 0;
 left: 0;
 margin: 12px;
 border-radius: 4px;
-}
-
-
-.center {
-margin: auto;
-width: 80%;
-
 }

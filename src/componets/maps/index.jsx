@@ -187,52 +187,53 @@ function MapPlanRoute(props) {
           
             <div>
                 <div className="sidebar">
-Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
+                Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
                 </div>
                 <div className='center'><div ref={mapContainer} className="map-container" /></div>
+         
+                <Grid
+                    container
+                    direction="column"
+                    justifyContent="flex-start"
+                    alignItems="center"
+                    spacing={3}
+                >
+               
+                    <ButtonGroup disableElevation variant="contained" aria-label="outlined primary button group">
+                        <Button onClick={addWaypoint}>Nuevo Waypoint</Button>
+                        <Button onClick={deleteWaypoint}>Eliminar Waypoint</Button>
+                        <Button onClick={saveWaypoint}>Guardar Waypoint</Button>
+                        <Button onClick={showWaypoint}>Mostrar Waypoints</Button>
+                    </ButtonGroup>
+            
+                </Grid>
+                <Grid
+                    container
+                    direction="column"
+                    justifyContent="flex-start"
+                    alignItems="center"
+                    spacing={3}
+                >{loadWaypoints()}    </Grid>
+            
+                <Modal
+                // eslint-disable-next-line react/prop-types
+                    open={openModal}
+                    onClose={handleClose}
+                    aria-labelledby="parent-modal-title"
+                    aria-describedby="parent-modal-description"
+                >
+                    <Box sx={{ ...style, width: 400 }}>
+                        <h2 id="parent-modal-title">Text in a modal</h2>
+                        <p id="parent-modal-description">
+      Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
+                        </p>
+                        <Button onClick={handleClose}>Close Child Modal</Button>
+
+                    </Box>
+                </Modal>
+                <Alert severity="error" message={message} handleClose={handleCloseSnack} getOpen={getSnack}></Alert>
             </div>
             
-            <Grid
-                container
-                direction="column"
-                justifyContent="flex-start"
-                alignItems="center"
-                spacing={3}
-            >
-               
-                <ButtonGroup disableElevation variant="contained" aria-label="outlined primary button group">
-                    <Button onClick={addWaypoint}>Nuevo Waypoint</Button>
-                    <Button onClick={deleteWaypoint}>Eliminar Waypoint</Button>
-                    <Button onClick={saveWaypoint}>Guardar Waypoint</Button>
-                    <Button onClick={showWaypoint}>Mostrar Waypoints</Button>
-                </ButtonGroup>
-            
-            </Grid>
-            <Grid
-                container
-                direction="column"
-                justifyContent="flex-start"
-                alignItems="center"
-                spacing={3}
-            >{loadWaypoints()}    </Grid>
-            
-            <Modal
-                // eslint-disable-next-line react/prop-types
-                open={openModal}
-                onClose={handleClose}
-                aria-labelledby="parent-modal-title"
-                aria-describedby="parent-modal-description"
-            >
-                <Box sx={{ ...style, width: 400 }}>
-                    <h2 id="parent-modal-title">Text in a modal</h2>
-                    <p id="parent-modal-description">
-      Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-                    </p>
-                    <Button onClick={handleClose}>Close Child Modal</Button>
-
-                </Box>
-            </Modal>
-            <Alert severity="error" message={message} handleClose={handleCloseSnack} getOpen={getSnack}></Alert>
         </React.Fragment>
     );
 }
