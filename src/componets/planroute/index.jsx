@@ -13,8 +13,6 @@ import PropTypes from 'prop-types';
 import Container from '@mui/material/Container';
 import CssBaseline from '@mui/material/CssBaseline';
 import { auth, logout } from '../../firebase/firebase';
-import Paper from '@material-ui/core/Paper';
-import Waypoint from './waypoint';
 // estilos
 import MenuRoadbook from '../menu';
 
@@ -43,21 +41,25 @@ function Roadbook(props) {
     const history = useHistory();
     
     useEffect(() => {
-        
+        //setCurrentWaypoints(waypoints.current);
         // requestGeoLocation();
         if (loading) return;
         if (!user) return history.replace('/');
       
-    }, []);
+    });
     const newRoute = () => {
         modal.current = true;
     };
 	
-    const loadWaypoints = () => (
-        <Paper>
-            {waypoints.current.map((point, index) => (<Waypoint key={index} />))}
-        </Paper>
-    );
+    /*const loadWaypoints = () => {
+        //setCurrentWaypoints([1, 2, 3, 4]);
+        //console.log('cargando');
+        return (
+            <Paper>
+                {currentWaypoints.map((point, index) => (<Waypoint key={index} />))}
+            </Paper>
+        );
+    };*/
     return (
 
         <>
@@ -81,8 +83,7 @@ function Roadbook(props) {
 						Roadbook V1
                     </Typography>
                 </Box>
-                <MapPlanRoute waypoints={waypoints}></MapPlanRoute>
-                {loadWaypoints()}
+                <MapPlanRoute waypoints={waypoints}></MapPlanRoute>  
             </Container>
             
         </>
