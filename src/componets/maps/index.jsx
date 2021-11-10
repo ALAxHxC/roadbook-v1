@@ -34,6 +34,7 @@ function MapPlanRoute(props) {
     const [message, getMessage] = React.useState('Error al crear waypoint');
     const [currentMarker, setCurrentMarker] = useState(null);
     const [canSave, setCanSave] = useState(null);
+    const [currentArray, setCurrentArray] = useState([]);
     const addWaypoint = () => {
         const marker = new mapboxgl.Marker({
             draggable: true,
@@ -74,22 +75,34 @@ function MapPlanRoute(props) {
         //console.log('here');
         setOpenModal(false);
     };
-    const addMarker = (distance,image) => {
+    //TODO OPTIMIZAR
+    const addMarker = (distance, image) => {
+        const index = props.waypoints.current.length;
         props.waypoints.current.push(currentMarker);
-        saveWaypointStorage('route', props.waypoints.current.length,
+        /*currentArray.push({
+            id: props.waypoints.current.length,
+            distance: distance,
+            position: currentMarker._lngLat,
+            image:image
+        });
+        setCurrentArray(currentArray);*/
+        saveWaypointStorage('route', index,
             JSON.stringify({
                 distance: distance,
                 position: currentMarker._lngLat,
                 image:image
             })
         );
-        loadWaypoints();
+        //loadWaypoints();
         
     };
+    //TODO OPTIMIAZ
     const deleteWaypoint = () => {
         if (props.waypoints.current.length > 1) {
             deleteLayer(props.waypoints.current.length - 1);
             props.waypoints.current.pop();
+            //currentArray.pop();
+            //setCurrentArray(currentArray);
             setCurrentMarker(props.waypoints.current[props.waypoints.current.length-1]);	 	
         }
         if (currentMarker != null) {
@@ -110,23 +123,26 @@ function MapPlanRoute(props) {
         return showPainter();   
         
     };
-    const  getDistance= async()=>{
-        if (props.waypoints.current.length < 1) {
+    const getDistance = async () => {
+        const index = props.waypoints.current.length;
+        if (index < 1) {
             return 0;
         }
-        console.log('draw');
+      
+        console.log('draw',props.waypoints.current[index - 1]);
         return await getRoute(
             currentMarker._lngLat,
-            props.waypoints.current[props.waypoints.current.length - 1]._lngLat,
+            props.waypoints.current[index - 1]._lngLat,
             map.current,
-            props.waypoints.current.length);
+            index);
     };
     async function newRoute() { 
+        const index = props.waypoints.current.length;
         const distance = await getRoute(
             currentMarker._lngLat,
-            props.waypoints.current[props.waypoints.current.length - 1]._lngLat,
+            props.waypoints.current[index - 1]._lngLat,
             map.current,
-            props.waypoints.current.length);
+            index);
         handleOpen();
         //addMarker(distance);
         //setCurrentMarker(null);
@@ -148,7 +164,7 @@ function MapPlanRoute(props) {
     };
     const loadWaypoints = () => (
         <Paper>
-            {[].map((point, index) => (<Waypoint key={index} />))}
+            {currentArray.map((point, index) => (<Waypoint key={index} data={point} />))}
         </Paper >
     );
     useEffect(() => {
@@ -184,7 +200,6 @@ function MapPlanRoute(props) {
    
     return (
         <React.Fragment>
-          
             <div>
                 <div className="sidebar">
                 Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
@@ -197,6 +212,7 @@ function MapPlanRoute(props) {
                     justifyContent="flex-start"
                     alignItems="center"
                     spacing={3}
+                    paddingBottom="30px"
                 >
                
                     <ButtonGroup disableElevation variant="contained" aria-label="outlined primary button group">
@@ -214,7 +230,6 @@ function MapPlanRoute(props) {
                     alignItems="center"
                     spacing={3}
                 >{loadWaypoints()}    </Grid>
-            
                 <Modal
                 // eslint-disable-next-line react/prop-types
                     open={openModal}
@@ -233,7 +248,6 @@ function MapPlanRoute(props) {
                 </Modal>
                 <Alert severity="error" message={message} handleClose={handleCloseSnack} getOpen={getSnack}></Alert>
             </div>
-            
         </React.Fragment>
     );
 }

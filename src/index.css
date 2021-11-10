@@ -19,9 +19,9 @@ width: 80%;
 }
 
 .map-container {
-z-index: 1;
-  margin: auto;
+margin-bottom: 30px;
 height: 400px;
+
 }
  
 .sidebar {

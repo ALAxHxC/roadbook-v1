@@ -17,7 +17,8 @@ import PropTypes from 'prop-types';
 import Container from '@mui/material/Container';
 import CssBaseline from '@mui/material/CssBaseline';
 import Item from './item';
-
+// eslint-disable-next-line no-unused-vars
+import ModalImportRoute from './file';
 //MENU
 import MenuRoadbook from '../menu';
 import { auth, db, logout } from '../../firebase/firebase';
@@ -30,7 +31,7 @@ import calculateDistance from '../../geolocation/distance';
 import {
     ContextData
 } from '../../App';
-
+//ModalImportRoute getOpen={open} setOpen={setOpen}></ModalImportRoute>
 ElevationScroll.propTypes = {
     children: PropTypes.element.isRequired,
     window: PropTypes.func,
@@ -39,6 +40,8 @@ ElevationScroll.propTypes = {
 function Roadbook(props) {
     const context = useContext(ContextData);
     const classes = useStylesIndex();
+    // eslint-disable-next-line no-unused-vars
+    const [open, setOpen] = useState(false);
     const [speed, setSpeed] = useState(0);
     const [odoTotal, setOdoTotal] = useState(0);
     const [user, loading, error] = useAuthState(auth);
@@ -107,7 +110,8 @@ function Roadbook(props) {
             lon: position.coords.longitude,
         });
     }
-
+    const handleOpen = () => setOpen(true);
+  
     useEffect(() => {
         if (!('geolocation' in navigator)) {
             requestGeoLocation();
@@ -126,6 +130,7 @@ function Roadbook(props) {
             if (currentPosition[0] === 0) {
                 setCurrentPosition(position.coords.latitude, position.coords.longitude);
             }
+        
             context.odometer = context.odometer + calculateDistance(currentPosition.lat,
                 currentPosition.lon, position.coords.latitude, position.coords.longitude);
             setOdoTotal((context.odometer / 1000).toFixed(3));
@@ -157,6 +162,7 @@ function Roadbook(props) {
 							Waypoint 1
                         </Typography>
                         <Button color="inherit" onClick={logout}>Logout</Button>
+                        <Button color="inherit" onClick={handleOpen}>Import File-</Button>
                     </Toolbar>
                     <Toolbar>
                         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
@@ -178,6 +184,7 @@ function Roadbook(props) {
                     </Typography>
                     {loadPoints()}
                 </Box>
+          
             </Container>
         </>
     );

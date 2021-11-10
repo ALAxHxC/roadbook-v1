@@ -17,7 +17,7 @@ const useStyles = makeStyles((theme) => ({
 export default function Item() {
     const classes = useStyles();
     return (
-        < Grid container spacing={5} >
+        < Grid container spacing={5} sx={{ paddingTop: 3, paddingRight: 3 }}>
             <Grid
                 item
                 xs={12}
